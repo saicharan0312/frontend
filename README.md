@@ -1,0 +1,2 @@
+# frontend
+MERN Stack application
