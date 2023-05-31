@@ -8,6 +8,7 @@ import {
   VALIDATOR_MINLENGTH,
   VALIDATOR_REQUIRE
 } from '../../shared/util/validators';
+import ImageUpload from '../../shared/components/FormElements/ImageUpload';
 import { useForm } from '../../shared/hooks/form-hook';
 import { AuthContext } from '../../shared/context/auth-context';
 import ErrorModal from '../../shared/components/UIElements/ErrorModal';
@@ -119,6 +120,7 @@ const Auth = () => {
               onInput={inputHandler}
             />
           )}
+          { !isLoginMode && <ImageUpload center id="image"  /> }
           <Input
             element="input"
             id="email"
