@@ -12,13 +12,13 @@ import { useForm } from '../../shared/hooks/form-hook';
 import { AuthContext } from '../../shared/context/auth-context';
 import ErrorModal from '../../shared/components/UIElements/ErrorModal';
 import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner'; 
+import { useHttpClient } from '../../shared/hooks/http-hook';
 import './Auth.css';
 
 const Auth = () => {
   const auth = useContext(AuthContext);
   const [isLoginMode, setIsLoginMode] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
 
   const [formState, inputHandler, setFormData] = useForm(
     {
@@ -60,64 +60,49 @@ const Auth = () => {
 
   const authSubmitHandler = async event => {
     event.preventDefault();
-    setIsLoading(true);
     if(isLoginMode) {
-      try {
-        const response = await fetch('http://localhost:5000/api/users/login', {
-          method : 'POST',
-          headers : {
-            'Content-Type' : 'application/json'
-          },
-          body : JSON.stringify({
-            email : formState.inputs.email.value,
-            password : formState.inputs.password.value,
-          })
-        });
-        const responseData = await response.json();
-        if(!response.ok) {
-          throw new Error(responseData.message);
+        try {
+            const responseData = await sendRequest(
+            'http://localhost:5000/api/users/login',
+            'POST',
+            JSON.stringify({
+              email : formState.inputs.email.value,
+              password : formState.inputs.password.value,
+            }),
+            {
+              'Content-Type' : 'application/json'
+            },
+          );
+          console.log("userId in login", responseData.user._id);
+          auth.login(responseData.user._id); 
+        } catch (err) {
+
         }
-        auth.login();
-      } catch(err) {
-        setIsLoading(false);
-        console.log(err);
-        setError(err.message || 'something went wrong, please try again later')
       }
-    } else {
+     else {
       try {
-        const response = await fetch('http://localhost:5000/api/users/signup', {
-          method : 'POST',
-          headers : {
-            'Content-Type' : 'application/json'
-          },
-          body : JSON.stringify({
+          const responseData = await sendRequest(
+          'http://localhost:5000/api/users/signup', 
+          'POST',
+          JSON.stringify({
             name : formState.inputs.name.value,
             email : formState.inputs.email.value,
             password : formState.inputs.password.value,
-          })
-        });
-        const responseData = await response.json();
-        if(!response.ok) {
-          throw new Error(responseData.message);
-        }
-        console.log("Auth JS",responseData);
-        auth.login();
-      } catch(err) {
-        setIsLoading(false);
-        console.log(err);
-        setError(err.message || 'something went wrong, please try again later')
-      }
+          }),
+          {
+            'Content-Type' : 'application/json'
+          },
+        );
+        console.log("userId in signup", responseData.user._id);
+        auth.login(responseData.user._id);
+      } catch(err) {}
     }
-    setIsLoading(false);
   };
 
-  const errorHandler = () => {
-    setError(null);
-  }
 
   return (
     <React.Fragment>
-      <ErrorModal error = { error } onClear={ errorHandler } />
+      <ErrorModal error = { error } onClear={ clearError } />
       <Card className="authentication">
         {isLoading && <LoadingSpinner osOvarlay /> }
         <h2>Login Required</h2>
@@ -148,8 +133,8 @@ const Auth = () => {
             id="password"
             type="password"
             label="Password"
-            validators={[VALIDATOR_MINLENGTH(5)]}
-            errorText="Please enter a valid password, at least 5 characters."
+            validators={[VALIDATOR_MINLENGTH(6)]}
+            errorText="Please enter a valid password, at least 6 characters."
             onInput={inputHandler}
           />
           <Button type="submit" disabled={!formState.isValid}>
