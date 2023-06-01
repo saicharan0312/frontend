@@ -16,11 +16,11 @@ import { AuthContext } from './shared/context/auth-context';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userId, setUserId] = useState("");
+  const [userId, setUserId] = useState(false);
 
-  const login = useCallback((uid) => {
+  const login = useCallback(uid => {
     setIsLoggedIn(true);
-    setUserId(uid)
+    setUserId(uid);
   }, []);
 
   const logout = useCallback(() => {
@@ -67,11 +67,11 @@ const App = () => {
 
   return (
     <AuthContext.Provider
-      value={{ 
-        isLoggedIn: isLoggedIn, 
-        userId : userId,
-        login: login, 
-        logout: logout 
+      value={{
+        isLoggedIn: isLoggedIn,
+        userId: userId,
+        login: login,
+        logout: logout
       }}
     >
       <Router>
@@ -81,23 +81,5 @@ const App = () => {
     </AuthContext.Provider>
   );
 };
-
-// "icons": [
-//   {
-//     "src": "favicon.ico",
-//     "sizes": "64x64 32x32 24x24 16x16",
-//     "type": "image/x-icon"
-//   },
-//   {
-//     "src": "logo192.png",
-//     "type": "image/png",
-//     "sizes": "192x192"
-//   },
-//   {
-//     "src": "logo512.png",
-//     "type": "image/png",
-//     "sizes": "512x512"
-//   }
-// ],
 
 export default App;
